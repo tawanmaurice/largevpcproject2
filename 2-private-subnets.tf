@@ -1,16 +1,23 @@
-# Private subnets (one per AZ)
 resource "aws_subnet" "private" {
-  # map index -> cidr so we can line up with var.azs
-  for_each = { for i, cidr in var.private_subnet_cidrs : tostring(i) => cidr }
+  # Build a map: "0" => { az = "...", cidr = "..." }
+  for_each = {
+    for idx, az in tolist(var.azs) :
+    tostring(idx) => {
+      az   = az
+      cidr = var.private_subnet_cidrs[idx]
+    }
+  }
 
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = each.value
-  availability_zone       = var.azs[tonumber(each.key)]
+  cidr_block              = each.value.cidr
+  availability_zone       = each.value.az
   map_public_ip_on_launch = false
 
-  tags = merge(local.common_tags, {
-    Name = "${var.project_name}-private-${var.azs[tonumber(each.key)]}"
-    Tier = "private"
-  })
+  tags = {
+    Project = var.project_name
+    Managed = "terraform"
+    Tier    = "private"
+    Name    = "${var.project_name}-private-${each.value.az}"
+  }
 }
 
