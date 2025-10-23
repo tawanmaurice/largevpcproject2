@@ -1,54 +1,29 @@
-# Large VPC Project with Terraform
+# Large VPC Project with Private Subnets + NAT
 
-## 📌 Overview
-This project provisions a basic AWS VPC environment with Terraform. It’s designed as a learning lab and can be extended into a production-ready architecture.
+This project provisions a **large AWS VPC** with both **public and private subnets** across three Availability Zones in `us-east-1`.  
+It demonstrates how to configure:
+- A custom VPC (10.10.0.0/16) with DNS support/hostnames enabled  
+- Public subnets with Internet Gateway + default routes  
+- Private subnets with a NAT Gateway for outbound Internet access  
+- Security Groups for HTTP/SSH  
+- A demo EC2 web server with Apache installed via user data  
 
-**What’s included:**
-- VPC (`10.10.0.0/16`)
-- 3 Public Subnets (across 3 Availability Zones)
-- Internet Gateway + Public Route Table
-- Security Group for Web Access
-  - HTTP (80) from anywhere
-  - SSH (22) restricted to my IP
-- EC2 Instance (Amazon Linux 2023, `t3.micro`)
-  - Apache web server installed via user data
-  - Simple HTML page served on port 80
-
-After deployment, the instance is reachable via a browser using the `web_http_url` output.
+The infrastructure is defined using **Terraform** and is modular, with resources split across multiple `.tf` files for clarity.
 
 ---
 
-## 🛠️ Prerequisites
-- [Terraform](https://developer.hashicorp.com/terraform/downloads) (v1.5+ recommended)
-- AWS account with programmatic access (IAM user/role + access keys)
-- AWS CLI configured (`aws configure`)
-- An existing EC2 key pair in your region (if you want SSH access)
+## 📁 Repository Structure
 
----
-
-## 🚀 Deployment
-
-```bash
-# Initialize Terraform
-terraform init
-
-# Validate syntax
-terraform validate
-
-# Preview the plan
-terraform plan
-
-# Apply changes
-terraform apply -auto-approve
-.
-├── 0-Auth.tf          # AWS provider / auth
-├── 1-vpc.tf           # VPC definition
-├── IGW.tf             # Internet Gateway
-├── route.tf           # Route tables and associations
-├── subnets.tf         # Public subnets
-├── 6-sg01-all.tf      # Security Group (HTTP + SSH)
-├── 7-ec2.tf           # Web EC2 instance + user data
-├── variables.tf       # Variable declarations
-├── terraform.tfvars   # Variable values (IP, key pair, etc.)
-├── outputs.tf         # Outputs (public DNS, URL)
-├── versions.tf        # Provider version constraints
+├── 0-Auth.tf # AWS provider / authentication (region, creds)
+├── 1-vpc.tf # VPC definition (CIDR block, DNS options)
+├── IGW.tf # Internet Gateway
+├── route.tf # Route tables and associations
+├── subnets.tf # Public subnets (3 AZs, auto-assign public IPs)
+├── 2-private-subnets.tf # Private subnets (3 AZs, no public IPs)
+├── 4-nat.tf # NAT Gateway + Elastic IP + private RTB routes
+├── 6-sg01-all.tf # Security Group (allow HTTP/SSH)
+├── 7-ec2.tf # Web EC2 instance + Apache via user data
+├── variables.tf # Variable declarations (VPC CIDRs, AZs, etc.)
+├── terraform.tfvars # Variable values (your_ip_cidr, key_name, etc.)
+├── outputs.tf # Outputs (public DNS, web URL, NAT IDs, subnets)
+├── versions.tf # Provider version constraints
