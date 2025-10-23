@@ -1,4 +1,4 @@
-# ----- REQUIRED -----
+# ---------------- REQUIRED ----------------
 variable "project_name" {
   description = "Short name used in tags and resource names"
   type        = string
@@ -24,7 +24,7 @@ variable "public_subnet_cidrs" {
   type        = list(string)
 }
 
-# ----- EC2 DEMO (OPTION B) -----
+# ---------------- EC2 DEMO (OPTION B) ----------------
 variable "allowed_ssh_cidr" {
   description = "CIDR allowed for SSH (use YOUR_IP/32 for safety)"
   type        = string
@@ -35,5 +35,17 @@ variable "key_name" {
   description = "Existing EC2 key pair name (or null to skip SSH)"
   type        = string
   default     = null
+}
+
+# ---------------- PRIVATE NETWORKING (Project 2) ----------------
+variable "private_subnet_cidrs" {
+  description = "CIDRs for private subnets (must match azs length)"
+  type        = list(string)
+}
+
+variable "single_nat_gateway" {
+  description = "If true, create a single NAT in the first public AZ (cheaper). If false, one NAT per AZ."
+  type        = bool
+  default     = true
 }
 
